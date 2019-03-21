@@ -8,6 +8,7 @@ Simple one-way bindings for django-channels with some specific support for djang
 
 ## Usage
 
+### Bindings
 ```python
 from django.db import models
 from rest_framework import serializers
@@ -41,7 +42,7 @@ class FamilyBinding(Binding):
     example of a binding not using a drf serializer
     """
     model = Family
-    stream = 'families'
+    stream = 'bird-families'
 
     @classmethod
     def group_names(cls, instance):
@@ -51,6 +52,27 @@ class FamilyBinding(Binding):
         return {'id': instance.id, 'name': instance.name}
 ```
 
+Now you make sure you have a WebsocketConsumer, which does something like `self.channel_layer.group_add('thrushes', self.channel_name)` in its connect coroutine.
+`Family.objects.create(name='thrushes')` will then cause the following to be sent over the associated websocket:
+
+```json
+{
+    "stream": "bird-families",
+    "payload": {
+        "action": "create",
+        "data": {"id": 1, "name": "thrushes"},
+        "model": "your_app.family",
+        "pk": 1
+    }
+}
+```
+
+Upon modification (`"action": "update"`) or deletion (`"action": "delete"`) you will receive messages with an equal structure.
+
+
+### Helpers
+In order to send a ws message from outside a binding, but using the same format (and also the
+drf json encoder) use the async `channels_oneway.utils.groupWsSend(group, stream, payload)` or its sync equivalent `groupWsSendSync`.
 
 ## Contributing
 
