@@ -4,7 +4,7 @@ from django.db.models.signals import (
     pre_delete,
     pre_save
 )
-from .consumers import groupWsSendSync
+from .utils import groupWsSendSync
 
 """
 This is heavly inspired from the bindings that existed in channels v1.
