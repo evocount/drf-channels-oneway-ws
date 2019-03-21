@@ -3,6 +3,7 @@ from django.conf.urls import url
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.testing import WebsocketCommunicator
 from channels.routing import URLRouter
+from rest_framework import serializers
 from asgiref.sync import sync_to_async
 from channels_oneway.bindings import Binding
 from channels_oneway.mixins import DRFJsonConsumerMixinAsync
@@ -82,6 +83,61 @@ async def test_binding():
             'data': {'id': 1, 'username': 'SuperUser'},
             'model': 'auth.user',
             'pk': 1
+        }
+    }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_serializer_binding():
+    class UserSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ('id', 'username', 'first_name', 'last_name')
+
+    class TestBinding(Binding):
+        model = User
+        stream = 'users'
+        serializer = UserSerializer
+
+        @classmethod
+        def group_names(cls, instance):
+            return ['users']
+
+    class TestConsumer(AsyncJsonWebsocketConsumer, DRFJsonConsumerMixinAsync):
+        async def connect(self):
+            await self.channel_layer.group_add('users', self.channel_name)
+            await self.accept()
+
+        async def disconnect(self, close_code):
+            await self.channel_layer.group_discard('users', self.channel_name)
+
+    application = URLRouter([
+        url(r"^testws/$", TestConsumer),
+    ])
+
+    communicator = WebsocketCommunicator(application, "/testws/")
+    connected, subprotocol = await communicator.connect()
+    assert connected
+
+    await sync_to_async(User.objects.create)(username='root')
+
+    response = await communicator.receive_json_from()
+
+    assert response == {
+        'stream': 'users',
+        'payload': {
+            'action': 'create',
+            'data': {
+                'id': 2,
+                'username': 'root',
+                'first_name': '',
+                'last_name': ''
+            },
+            'model': 'auth.user',
+            'pk': 2
         }
     }
 
