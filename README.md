@@ -1,3 +1,7 @@
+[![PyPI version](https://badge.fury.io/py/drf-channels-oneway-ws.svg)](https://badge.fury.io/py/drf-channels-oneway-ws)
+[![Build Status](https://travis-ci.org/evocount/drf-channels-oneway-ws.svg?branch=master)](https://travis-ci.org/evocount/drf-channels-oneway-ws)
+[![codecov](https://codecov.io/gh/evocount/drf-channels-oneway-ws/branch/master/graph/badge.svg)](https://codecov.io/gh/evocount/drf-channels-oneway-ws)
+
 # DRF channels one-way WS
 
 Simple one-way bindings for django-channels with some specific support for django-rest-framework serializers and websockets. I.e. enrich your existing API with push notifications.
@@ -78,7 +82,7 @@ In order to send a ws message from outside a binding, but using the same format 
 ### Installation
 
 * `git clone git@github.com:evocount/drf-channels-oneway-ws.git`
-* `cd python-set-ings`
+* `cd drf-channels-oneway-ws`
 * `pipenv install --dev`
 
 ### Running tests
