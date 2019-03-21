@@ -7,9 +7,10 @@ import json
 channel_layer = get_channel_layer()
 
 
-async def groupWsSend(group, stream, payload):
+async def groupSend(group, stream, payload):
     """
-    …
+    Send message to group in a stream using django-rest-framework's json
+    encoder.
     """
     await channel_layer.group_send(
         group,
@@ -23,8 +24,8 @@ async def groupWsSend(group, stream, payload):
     )
 
 
-def groupWsSendSync(group, stream, payload):
-    async_to_sync(groupWsSend)(
+def groupSendSync(group, stream, payload):
+    async_to_sync(groupSend)(
         group,
         stream,
         payload

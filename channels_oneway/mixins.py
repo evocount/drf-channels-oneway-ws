@@ -4,7 +4,8 @@ import json
 
 class DRFJsonConsumerMixinAsync:
     """
-    sss
+    Use this mixin on your consumers to encode json using
+    django-rest-framework's encoder and to enable sending from bindings.
     """
     @classmethod
     async def encode_json(cls, content):

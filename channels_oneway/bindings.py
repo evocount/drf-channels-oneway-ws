@@ -4,7 +4,7 @@ from django.db.models.signals import (
     pre_delete,
     pre_save
 )
-from .utils import groupWsSendSync
+from .utils import groupSendSync
 
 """
 This is heavly inspired from the bindings that existed in channels v1.
@@ -117,7 +117,7 @@ class Binding(object, metaclass=BindingMetaClass):
 
         assert self.stream is not None
         for group_name in group_names:
-            groupWsSendSync(group_name, self.stream, payload)
+            groupSendSync(group_name, self.stream, payload)
 
     @classmethod
     def group_names(cls, instance):

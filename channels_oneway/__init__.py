@@ -1,11 +1,11 @@
 from .bindings import Binding
 from .mixins import DRFJsonConsumerMixinAsync
-from .utils import groupWsSend, groupWsSendSync
+from .utils import groupSend, groupSendSync
 
 
 __all__ = [
     Binding,
     DRFJsonConsumerMixinAsync,
-    groupWsSend,
-    groupWsSendSync
+    groupSend,
+    groupSendSync
 ]

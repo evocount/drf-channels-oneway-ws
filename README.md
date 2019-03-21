@@ -71,8 +71,7 @@ Upon modification (`"action": "update"`) or deletion (`"action": "delete"`) you 
 
 
 ### Helpers
-In order to send a ws message from outside a binding, but using the same format (and also the
-drf json encoder) use the async `channels_oneway.utils.groupWsSend(group, stream, payload)` or its sync equivalent `groupWsSendSync`.
+In order to send a ws message from outside a binding, but using the same format (stream + payload) (and also the drf json encoder) use the async `channels_oneway.utils.groupSend(group, stream, payload)` or its sync equivalent `groupSendSync`.
 
 ## Contributing
 
