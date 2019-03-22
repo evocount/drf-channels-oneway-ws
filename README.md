@@ -74,6 +74,10 @@ Now you make sure you have a WebsocketConsumer, which does something like `self.
 Upon modification (`"action": "update"`) or deletion (`"action": "delete"`) you will receive messages with an equal structure.
 
 
+#### Registration
+In order to let the bindings register their signals make sure they are imported at some point. In case you use a dedicated file, import it from [`AppConfig.ready`](https://docs.djangoproject.com/en/2.2/ref/applications/#django.apps.AppConfig.ready) just like your signals.
+
+
 ### Helpers
 In order to send a ws message from outside a binding, but using the same format (stream + payload) (and also the drf json encoder) use the async `channels_oneway.utils.groupSend(group, stream, payload)` or its sync equivalent `groupSendSync`.
 
