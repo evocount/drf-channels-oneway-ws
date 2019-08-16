@@ -4,6 +4,7 @@ from django.db.models.signals import (
     pre_delete,
     pre_save
 )
+from django.db import transaction
 from .utils import groupSendSync
 
 """
@@ -60,7 +61,17 @@ class Binding(object, metaclass=BindingMetaClass):
 
     @classmethod
     def post_save_receiver(cls, instance, created, **kwargs):
-        cls.post_change_receiver(instance, CREATE if created else UPDATE, **kwargs)
+        # If this is called upon saving a drf serializer which included
+        # ManyToMany relationships those will only be available once the
+        # commit has finished. As those manytomany fields might be included
+        # in the serializer we using for ws messages, let's wait for on_commit.
+        transaction.on_commit(
+            lambda: cls.post_change_receiver(
+                instance,
+                CREATE if created else UPDATE,
+                **kwargs
+            )
+        )
 
     @classmethod
     def pre_delete_receiver(cls, instance, **kwargs):
