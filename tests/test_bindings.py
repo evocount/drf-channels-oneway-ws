@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.conf.urls import url
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.testing import WebsocketCommunicator
@@ -18,6 +19,7 @@ async def test_binding():
     class TestBinding(Binding):
         model = User
         stream = 'users'
+        m2m_senders = [User.groups.through]
 
         @classmethod
         def group_names(cls, instance):
@@ -59,6 +61,22 @@ async def test_binding():
     user.username = 'SuperUser'
 
     await sync_to_async(user.save)()
+
+    response = await communicator.receive_json_from()
+
+    assert response == {
+        'stream': 'users',
+        'payload': {
+            'action': 'update',
+            'data': {'id': 1, 'username': 'SuperUser'},
+            'model': 'auth.user',
+            'pk': 1
+        }
+    }
+
+    group = await sync_to_async(Group.objects.create)(name='group')
+
+    await sync_to_async(user.groups.set)([group])
 
     response = await communicator.receive_json_from()
 

@@ -2,7 +2,8 @@ from django.db.models.signals import (
     post_delete,
     post_save,
     pre_delete,
-    pre_save
+    pre_save,
+    m2m_changed
 )
 from django.db import transaction
 from .utils import groupSendSync
@@ -36,6 +37,8 @@ class Binding(object, metaclass=BindingMetaClass):
     model = None
     stream = None
     serializer = None
+    # optionally also connect to releated m2m fields
+    m2m_senders = []
 
     # the kwargs the triggering signal (e.g. post_save) was emitted with
     signal_kwargs = None
@@ -50,9 +53,19 @@ class Binding(object, metaclass=BindingMetaClass):
         pre_delete.connect(cls.pre_delete_receiver, sender=cls.model)
         post_delete.connect(cls.post_delete_receiver, sender=cls.model)
 
+        for sender in cls.m2m_senders:
+            m2m_changed.connect(cls.m2m_changed_receiver, sender=sender)
+
         cls.model_label = f'{cls.model._meta.app_label.lower()}.{cls.model._meta.object_name.lower()}'
 
     # Outbound binding
+
+    @classmethod
+    def m2m_changed_receiver(cls, instance, action, **kwargs):
+        if action.startswith('pre_'):
+            cls.pre_change_receiver(instance, UPDATE, **kwargs)
+        else:
+            cls.post_change_receiver(instance, UPDATE, **kwargs)
 
     @classmethod
     def pre_save_receiver(cls, instance, **kwargs):
@@ -82,7 +95,7 @@ class Binding(object, metaclass=BindingMetaClass):
         cls.post_change_receiver(instance, DELETE, **kwargs)
 
     @classmethod
-    def pre_change_receiver(cls, instance, action):
+    def pre_change_receiver(cls, instance, action, **kwargs):
         """
         Entry point for triggering the binding from save signals.
         """
