@@ -28,7 +28,7 @@ class Bird(models.Model):
 
 class BirdSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Customer
+        model = Bird
         fields = ('__all__')
 
 
